@@ -4,3 +4,253 @@ git commit -m "Initial commit"
 git remote add origin https://github.com/yourusername/your-repository-name.git
 git branch -M main
 git push -u origin main
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sun, Moon, RefreshCw } from 'lucide-react';
+
+// MotivationalQuote component
+const MotivationalQuote = () => {
+  const quotes = [
+    "The best time to start was yesterday. The next best time is now.",
+    "Small steps every day lead to big financial gains over time.",
+    "Your financial future is created by what you do today, not tomorrow.",
+    "Invest in yourself. Your career is the engine of your wealth.",
+    "Don't save what is left after spending; spend what is left after saving.",
+  ];
+
+  const [quote] = useState(quotes[Math.floor(Math.random() * quotes.length)]);
+
+  return (
+    <Card className="mt-4">
+      <CardContent className="flex items-center p-4">
+        <p className="italic">{quote}</p>
+      </CardContent>
+    </Card>
+  );
+};
+
+// OnboardingForm component
+const OnboardingForm = ({ onSubmit }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    monthlyIncome: '',
+    monthlySavings: '',
+    financialGoal: '',
+  });
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: '' });
+  };
+
+  const validateForm = () => {
+    let formIsValid = true;
+    let errors = {};
+
+    if (!formData.name.trim()) {
+      formIsValid = false;
+      errors.name = "Name is required";
+    }
+
+    if (!formData.monthlyIncome || isNaN(formData.monthlyIncome) || Number(formData.monthlyIncome) <= 0) {
+      formIsValid = false;
+      errors.monthlyIncome = "Please enter a valid monthly income";
+    }
+
+    if (!formData.monthlySavings || isNaN(formData.monthlySavings) || Number(formData.monthlySavings) < 0) {
+      formIsValid = false;
+      errors.monthlySavings = "Please enter a valid monthly savings amount";
+    }
+
+    if (!formData.financialGoal) {
+      formIsValid = false;
+      errors.financialGoal = "Please select a financial goal";
+    }
+
+    setErrors(errors);
+    return formIsValid;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+      onSubmit(formData);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto mt-10">
+      <h1 className="text-3xl font-bold mb-6">Welcome to MyFinance Guru</h1>
+      <p className="mb-4">Let's get started with some basic information to kickstart your financial journey:</p>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block mb-1">Your Name</label>
+          <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full p-2 border rounded" />
+          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+        </div>
+        <div>
+          <label className="block mb-1">Monthly Income (EGP)</label>
+          <input type="number" name="monthlyIncome" value={formData.monthlyIncome} onChange={handleChange} className="w-full p-2 border rounded" />
+          {errors.monthlyIncome && <p className="text-red-500 text-sm mt-1">{errors.monthlyIncome}</p>}
+        </div>
+        <div>
+          <label className="block mb-1">Monthly Savings Goal (EGP)</label>
+          <input type="number" name="monthlySavings" value={formData.monthlySavings} onChange={handleChange} className="w-full p-2 border rounded" />
+          {errors.monthlySavings && <p className="text-red-500 text-sm mt-1">{errors.monthlySavings}</p>}
+        </div>
+        <div>
+          <label className="block mb-1">Primary Financial Goal</label>
+          <select 
+            name="financialGoal" 
+            value={formData.financialGoal} 
+            onChange={handleChange} 
+            className="w-full p-2 border rounded"
+          >
+            <option value="">Select a goal</option>
+            <option value="emergency_fund">Build Emergency Fund</option>
+            <option value="debt_free">Become Debt-Free</option>
+            <option value="buy_home">Save for a Home</option>
+            <option value="retirement">Plan for Retirement</option>
+            <option value="invest">Start Investing</option>
+          </select>
+          {errors.financialGoal && <p className="text-red-500 text-sm mt-1">{errors.financialGoal}</p>}
+        </div>
+        <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Start My Financial Journey</button>
+      </form>
+      <MotivationalQuote />
+    </div>
+  );
+};
+
+// FinancialPlan component
+const FinancialPlan = ({ userData }) => {
+  if (!userData) return null;
+
+  const monthlyIncome = parseFloat(userData.monthlyIncome);
+  const monthlySavings = parseFloat(userData.monthlySavings);
+  const savingsRate = (monthlySavings / monthlyIncome) * 100;
+
+  const renderGoalResults = () => {
+    switch (userData.financialGoal) {
+      case 'emergency_fund':
+        const targetEmergencyFund = monthlyIncome * 6;
+        const monthsToEmergencyFund = Math.ceil(targetEmergencyFund / monthlySavings);
+        return (
+          <div>
+            <p>Your goal is to build an emergency fund. Here's a personalized plan:</p>
+            <ul className="list-disc pl-5 mt-2">
+              <li>Aim for an emergency fund of EGP {targetEmergencyFund.toLocaleString()}, which is 6 months of your income.</li>
+              <li>At your current savings rate of {savingsRate.toFixed(1)}%, it would take approximately {monthsToEmergencyFund} months to reach this goal.</li>
+            </ul>
+          </div>
+        );
+
+      case 'debt_free':
+        return (
+          <div>
+            <p>Your goal is to become debt-free. Here's a personalized plan:</p>
+            <ul className="list-disc pl-5 mt-2">
+              <li>Focus on paying down high-interest debt first, such as credit card balances.</li>
+            </ul>
+          </div>
+        );
+
+      case 'buy_home':
+        const downPayment = monthlyIncome * 4;
+        const yearsToSave = Math.ceil((downPayment) / (monthlySavings * 12));
+        return (
+          <div>
+            <p>Your goal is to save for a home. Here's a personalized plan:</p>
+            <ul className="list-disc pl-5 mt-2">
+              <li>Aim for a down payment of around EGP {downPayment.toLocaleString()}, which is about 4 times your monthly income.</li>
+              <li>At your current savings rate of {savingsRate.toFixed(1)}%, it would take approximately {yearsToSave} years to save for this down payment.</li>
+            </ul>
+          </div>
+        );
+
+      case 'retirement':
+        const retirementSavingsRate = (monthlySavings / monthlyIncome) * 100;
+        return (
+          <div>
+            <p>Your goal is to plan for retirement. Here's a personalized plan:</p>
+            <ul className="list-disc pl-5 mt-2">
+              <li>You're currently saving {retirementSavingsRate.toFixed(1)}% of your income for retirement.</li>
+            </ul>
+          </div>
+        );
+
+      case 'invest':
+        const investmentAmount = monthlySavings * 0.8; // Assuming 80% of savings for investment
+        return (
+          <div>
+            <p>Your goal is to start investing. Here's a personalized plan:</p>
+            <ul className="list-disc pl-5 mt-2">
+              <li>Consider investing about EGP {investmentAmount.toLocaleString()} per month, which is 80% of your current savings.</li>
+            </ul>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Card className="mt-4">
+      <CardHeader>
+        <CardTitle>Your Personalized Financial Plan</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p><strong>Name:</strong> {userData.name}</p>
+        <p><strong>Monthly Income:</strong> EGP {monthlyIncome.toLocaleString()}</p>
+        <p><strong>Monthly Savings:</strong> EGP {monthlySavings.toLocaleString()}</p>
+        <p><strong>Savings Rate:</strong> {savingsRate.toFixed(1)}% of income</p>
+        <p><strong>Financial Goal:</strong> {userData.financialGoal.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
+        <div className="mt-4">
+          {renderGoalResults()}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Main MyFinanceGuru component
+const MyFinanceGuru = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  const handleOnboardingSubmit = (formData) => {
+    setUserData(formData);
+  };
+
+  const handleReset = () => {
+    setUserData(null);
+  };
+
+  return (
+    <div className={`p-4 ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
+      <div className="flex justify-end mb-6 space-x-2">
+        <button onClick={toggleDarkMode} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+          {darkMode ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
+        </button>
+        {userData && (
+          <button onClick={handleReset} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+            <RefreshCw className="h-6 w-6" />
+          </button>
+        )}
+      </div>
+      {!userData ? (
+        <OnboardingForm onSubmit={handleOnboardingSubmit} />
+      ) : (
+        <FinancialPlan userData={userData} />
+      )}
+    </div>
+  );
+};
+
+export default MyFinanceGuru;
